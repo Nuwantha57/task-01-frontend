@@ -3,30 +3,44 @@ import api from "../api/api";
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
+  const [query, setQuery] = useState("");
+
+  const loadUsers = () => {
+    api.get(`/admin/users?query=${query}&page=0&size=20`)
+      .then(res => setUsers(res.data))
+      .catch(err => console.error("Error fetching users:", err));
+  };
 
   useEffect(() => {
-    api.get("/admin/users")
-      .then(res => setUsers(res.data))
-      .catch(err => console.error(err));
+    loadUsers();
   }, []);
 
   return (
-    <div>
-      <h2>Users</h2>
-      <table>
+    <div style={{ padding: "20px" }}>
+      <h2>User Management</h2>
+      <input
+        placeholder="Search user"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+      />
+      <button onClick={loadUsers}>Search</button>
+
+      <table border="1" cellPadding="6" style={{ marginTop: "10px" }}>
         <thead>
           <tr>
+            <th>ID</th>
             <th>Email</th>
             <th>Name</th>
             <th>Roles</th>
           </tr>
         </thead>
         <tbody>
-          {users.map(user => (
-            <tr key={user.id}>
-              <td>{user.email}</td>
-              <td>{user.displayName}</td>
-              <td>{user.roles.join(", ")}</td>
+          {users.map(u => (
+            <tr key={u.id}>
+              <td>{u.id}</td>
+              <td>{u.email}</td>
+              <td>{u.displayName}</td>
+              <td>{u.roles.join(", ")}</td>
             </tr>
           ))}
         </tbody>
