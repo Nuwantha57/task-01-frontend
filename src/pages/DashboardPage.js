@@ -36,14 +36,15 @@ const DashboardPage = () => {
     <div style={{ padding: "20px" }}>
       <h1>Welcome, {user.displayName}</h1>
       <p>Email: {user.email}</p>
-      <p>Roles: {user.roles.join(", ")}</p>
+      <p>Roles: {(user.roles || []).join(", ") || "N/A"}</p>
       <button onClick={() => navigate("/profile")}>Edit Profile</button>
-      {user.roles.includes("ADMIN") && (
-        <>
-          <button onClick={() => navigate("/admin/users")}>Manage Users</button>
-          <button onClick={() => navigate("/admin/audit-log")}>Audit Logs</button>
-        </>
-      )}
+      {(user.roles || []).includes("ADMIN") && (
+  <>
+    <button onClick={() => navigate("/admin/users")}>Manage Users</button>
+    <button onClick={() => navigate("/admin/audit-log")}>Audit Logs</button>
+  </>
+)}
+
       <button onClick={logout}>Logout</button>
     </div>
   );
