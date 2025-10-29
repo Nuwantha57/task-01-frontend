@@ -1,115 +1,256 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 
 const AuditLogs = () => {
-  const navigate = useNavigate();
   const [logs, setLogs] = useState([]);
+  const [filteredLogs, setFilteredLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [userId, setUserId] = useState("");
-  const [range, setRange] = useState("30");
+  const [filters, setFilters] = useState({
+    userId: "",
+    eventType: "",
+    startDate: "",
+    endDate: ""
+  });
 
-  const fetchLogs = async () => {
-    setLoading(true);
-    setError(null);
+  useEffect(() => {
+    fetchAuditLogs();
+  }, []);
+
+  const fetchAuditLogs = async () => {
     try {
+      setLoading(true);
       const params = {};
-      if (userId) params.userId = userId;
-      if (range) params.range = range;
-
+      
+      if (filters.userId) params.userId = filters.userId;
+      if (filters.startDate) params.startDate = filters.startDate;
+      if (filters.endDate) params.endDate = filters.endDate;
+      
       const response = await api.get("/admin/audit-log", { params });
-      setLogs(response.data || []);
+      setLogs(response.data);
+      applyFilters(response.data);
+      setError(null);
     } catch (err) {
-      console.error("Failed to fetch audit logs:", err);
-      setError("Failed to load audit logs");
-      if (err.response?.status === 403) {
-        setError("Access denied. Admin role required.");
-      }
+      console.error("Error fetching audit logs:", err);
+      setError("Failed to fetch audit logs");
+      setLogs([]);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchLogs();
-  }, []);
+  const applyFilters = (data) => {
+    let filtered = data;
 
-  const handleFilter = (e) => {
-    e.preventDefault();
-    fetchLogs();
+    if (filters.eventType) {
+      filtered = filtered.filter(log =>
+        log.eventType.toLowerCase().includes(filters.eventType.toLowerCase())
+      );
+    }
+
+    setFilteredLogs(filtered);
   };
 
-  if (loading && logs.length === 0) {
-    return <div style={{ padding: '20px' }}>Loading audit logs...</div>;
-  }
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleApplyFilters = () => {
+    applyFilters(logs);
+  };
+
+  const handleReset = () => {
+    setFilters({
+      userId: "",
+      eventType: "",
+      startDate: "",
+      endDate: ""
+    });
+    setFilteredLogs(logs);
+  };
+
+  if (loading) return <div className="loading">Loading audit logs...</div>;
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div className="audit-logs-container">
       <h2>Audit Logs</h2>
-      
-      <button onClick={() => navigate("/dashboard")} style={{ marginBottom: '20px' }}>
-        ← Back to Dashboard
-      </button>
 
-      {error && <div style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
+      <div className="filters-section">
+        <h3>Filters</h3>
+        <div className="filter-group">
+          <label>
+            User ID:
+            <input
+              type="text"
+              name="userId"
+              value={filters.userId}
+              onChange={handleFilterChange}
+              placeholder="Enter user ID"
+            />
+          </label>
 
-      <form onSubmit={handleFilter} style={{ marginBottom: '20px' }}>
-        <label style={{ marginRight: '10px' }}>
-          User ID:
-          <input
-            type="text"
-            value={userId}
-            onChange={(e) => setUserId(e.target.value)}
-            placeholder="Optional"
-            style={{ marginLeft: '5px', padding: '5px' }}
-          />
-        </label>
-        <label style={{ marginRight: '10px' }}>
-          Days:
-          <select 
-            value={range} 
-            onChange={(e) => setRange(e.target.value)}
-            style={{ marginLeft: '5px', padding: '5px' }}
-          >
-            <option value="7">Last 7 days</option>
-            <option value="30">Last 30 days</option>
-            <option value="90">Last 90 days</option>
-          </select>
-        </label>
-        <button type="submit">Filter</button>
-      </form>
+          <label>
+            Event Type:
+            <input
+              type="text"
+              name="eventType"
+              value={filters.eventType}
+              onChange={handleFilterChange}
+              placeholder="e.g., LOGIN"
+            />
+          </label>
 
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>User</th>
-            <th>Email</th>
-            <th>Event Type</th>
-            <th>IP Address</th>
-            <th>Time</th>
-          </tr>
-        </thead>
-        <tbody>
-          {logs.length === 0 ? (
+          <label>
+            Start Date:
+            <input
+              type="datetime-local"
+              name="startDate"
+              value={filters.startDate}
+              onChange={handleFilterChange}
+            />
+          </label>
+
+          <label>
+            End Date:
+            <input
+              type="datetime-local"
+              name="endDate"
+              value={filters.endDate}
+              onChange={handleFilterChange}
+            />
+          </label>
+
+          <button onClick={handleApplyFilters} className="btn-apply">
+            Apply Filters
+          </button>
+          <button onClick={handleReset} className="btn-reset">
+            Reset
+          </button>
+        </div>
+      </div>
+
+      {error && <div className="error-message">{error}</div>}
+
+      <div className="table-container">
+        <table>
+          <thead>
             <tr>
-              <td colSpan="6" style={{ textAlign: 'center' }}>No audit logs found</td>
+              <th>ID</th>
+              <th>User</th>
+              <th>Event</th>
+              <th>IP Address</th>
+              <th>Time</th>
             </tr>
-          ) : (
-            logs.map(log => (
-              <tr key={log.id}>
-                <td>{log.id}</td>
-                <td>{log.user?.displayName || "N/A"}</td>
-                <td>{log.user?.email || "N/A"}</td>
-                <td>{log.eventType}</td>
-                <td>{log.ipAddress}</td>
-                <td>{new Date(log.loginTime).toLocaleString()}</td>
+          </thead>
+          <tbody>
+            {filteredLogs.length > 0 ? (
+              filteredLogs.map(log => (
+                <tr key={log.id}>
+                  <td>{log.id}</td>
+                  <td>{log.user?.displayName || "N/A"}</td>
+                  <td>{log.eventType}</td>
+                  <td>{log.ipAddress}</td>
+                  <td>{new Date(log.loginTime).toLocaleString()}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5" className="no-data">
+                  No audit logs found
+                </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <style>{`
+        .audit-logs-container {
+          padding: 20px;
+        }
+
+        .filters-section {
+          background: #f5f5f5;
+          padding: 15px;
+          border-radius: 5px;
+          margin-bottom: 20px;
+        }
+
+        .filter-group {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 15px;
+          margin-top: 10px;
+        }
+
+        .filter-group label {
+          display: flex;
+          flex-direction: column;
+          font-weight: bold;
+        }
+
+        .filter-group input {
+          padding: 8px;
+          margin-top: 5px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+        }
+
+        .btn-apply, .btn-reset {
+          padding: 8px 15px;
+          margin-top: 20px;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-weight: bold;
+        }
+
+        .btn-apply {
+          background: #4CAF50;
+          color: white;
+          margin-right: 10px;
+        }
+
+        .btn-apply:hover {
+          background: #45a049;
+        }
+
+        .btn-reset {
+          background: #f44336;
+          color: white;
+        }
+
+        .btn-reset:hover {
+          background: #da190b;
+        }
+
+        .table-container {
+          overflow-x: auto;
+        }
+
+        .error-message {
+          color: #d32f2f;
+          padding: 10px;
+          background: #ffebee;
+          border-radius: 4px;
+          margin-bottom: 15px;
+        }
+
+        .loading {
+          text-align: center;
+          padding: 20px;
+          font-weight: bold;
+        }
+
+        .no-data {
+          text-align: center;
+          color: #999;
+        }
+      `}</style>
     </div>
   );
 };
