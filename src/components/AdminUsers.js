@@ -74,42 +74,52 @@ const AdminUsers = () => {
   };
 
   const handleAssignRoles = async () => {
-    if (!selectedUser) {
-      setError("No user selected");
-      return;
-    }
+  if (!selectedUser) {
+    setError("No user selected");
+    return;
+  }
 
-    if (selectedRoles.length === 0) {
-      setError("Please select at least one role");
-      return;
-    }
+  if (selectedRoles.length === 0) {
+    setError("Please select at least one role");
+    return;
+  }
 
-    try {
-      setAssigning(true);
-      await api.patch(`/admin/users/${selectedUser.id}/roles`, selectedRoles);
-      
-      // Update the user in the list
-      const updatedUsers = users.map(u =>
-        u.id === selectedUser.id ? { ...u, roles: selectedRoles } : u
-      );
-      setUsers(updatedUsers);
-      setFilteredUsers(updatedUsers.filter(u =>
-        u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        u.displayName.toLowerCase().includes(searchQuery.toLowerCase())
-      ));
+  try {
+    setAssigning(true);
+    await api.patch(`/admin/users/${selectedUser.id}/roles`, {
+      roles: selectedRoles
+    });
+    
+    // Update the user in both users and filteredUsers arrays
+    const updatedUsers = users.map(u =>
+      u.id === selectedUser.id ? { ...u, roles: selectedRoles } : u
+    );
+    
+    setUsers(updatedUsers);
+    
+    // Re-apply search filter to filteredUsers
+    const filtered = updatedUsers.filter(u =>
+      u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (u.id && u.id.toString().includes(searchQuery.toLowerCase()))
+    );
+    setFilteredUsers(filtered);
 
-      setSelectedUser(null);
-      setSelectedRoles([]);
-      alert("Roles assigned successfully!");
-    } catch (err) {
-      console.error("Error assigning roles:", err);
-      setError(
-        err.response?.data?.message || "Failed to assign roles"
-      );
-    } finally {
-      setAssigning(false);
-    }
-  };
+    setSelectedUser(null);
+    setSelectedRoles([]);
+    setError(null);
+    alert("Roles assigned successfully!");
+  } catch (err) {
+    console.error("Error assigning roles:", err);
+    setError(
+      err.response?.data?.message || 
+      err.response?.data?.error ||
+      "Failed to assign roles"
+    );
+  } finally {
+    setAssigning(false);
+  }
+};
 
   if (loading) {
     return <div className="loading">Loading users...</div>;
