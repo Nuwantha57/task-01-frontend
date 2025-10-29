@@ -21,10 +21,40 @@ const DashboardPage = () => {
     fetchUserData();
   }, [navigate]);
 
+  // Add visibility change listener to refetch when tab becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        // Check if profile was updated
+        if (sessionStorage.getItem('profileUpdated') === 'true') {
+          console.log('Profile was updated, refreshing user data...');
+          fetchUserData();
+          sessionStorage.removeItem('profileUpdated');
+        }
+      }
+    };
+
+    // Also check when component mounts/updates
+    if (sessionStorage.getItem('profileUpdated') === 'true') {
+      console.log('Profile was updated, refreshing user data...');
+      fetchUserData();
+      sessionStorage.removeItem('profileUpdated');
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleVisibilityChange);
+    };
+  }, []);
+
   const fetchUserData = async () => {
     try {
       setLoading(true);
       const response = await api.get("/me");
+      console.log('Fetched user data:', response.data);
       setUser(response.data);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -36,6 +66,7 @@ const DashboardPage = () => {
 
   const logout = () => {
     localStorage.removeItem("id_token");
+    sessionStorage.clear();
     navigate("/login");
   };
 

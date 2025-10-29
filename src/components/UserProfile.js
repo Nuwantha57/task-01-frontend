@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 
 const UserProfile = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState({ displayName: "", locale: "" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -57,6 +59,10 @@ const UserProfile = () => {
         type: "success",
         text: "Profile updated successfully!"
       });
+      
+      // Store a flag to indicate profile was updated
+      sessionStorage.setItem('profileUpdated', 'true');
+      
       setTimeout(() => setMessage({ type: "", text: "" }), 3000);
     } catch (err) {
       console.error("Error updating profile:", err);
@@ -69,13 +75,26 @@ const UserProfile = () => {
     }
   };
 
+  const handleCancel = () => {
+    fetchUserProfile();
+  };
+
+  const handleBackToDashboard = () => {
+    navigate("/dashboard");
+  };
+
   if (loading) {
     return <div className="loading">Loading profile...</div>;
   }
 
   return (
     <div className="profile-container">
-      <h2>My Profile</h2>
+      <div className="header-section">
+        <h2>My Profile</h2>
+        <button onClick={handleBackToDashboard} className="btn-back">
+          ← Back to Dashboard
+        </button>
+      </div>
 
       {message.text && (
         <div className={`message message-${message.type}`}>
@@ -136,7 +155,7 @@ const UserProfile = () => {
           >
             {saving ? "Saving..." : "Update Profile"}
           </button>
-          <button onClick={fetchUserProfile} disabled={saving} className="btn-secondary">
+          <button onClick={handleCancel} disabled={saving} className="btn-secondary">
             Cancel
           </button>
         </div>
@@ -147,6 +166,32 @@ const UserProfile = () => {
           max-width: 500px;
           margin: 0 auto;
           padding: 20px;
+        }
+
+        .header-section {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+        }
+
+        .header-section h2 {
+          margin: 0;
+        }
+
+        .btn-back {
+          background: #6c757d;
+          color: white;
+          border: none;
+          padding: 8px 16px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 14px;
+          transition: background 0.3s;
+        }
+
+        .btn-back:hover {
+          background: #5a6268;
         }
 
         .profile-form {
@@ -266,6 +311,14 @@ const UserProfile = () => {
           text-align: center;
           padding: 20px;
           font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+          .header-section {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+          }
         }
       `}</style>
     </div>
