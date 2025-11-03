@@ -15,7 +15,7 @@ const LoginPage = () => {
   return (
     <div style={{ textAlign: "center", marginTop: "150px" }}>
       <h2>Admin Login</h2>
-      <button onClick={handleLogin}>Login with AWS Cognito</button>
+      <button id="loginBtn" onClick={handleLogin} style={{ padding: '10px 20px', fontSize: '16px' }}>Login with AWS Cognito</button>
     </div>
   );
 };
