@@ -32,6 +32,12 @@ async function buildDriver() {
     script: 30000 
   });
   
+  // Track driver globally for reporting hooks (screenshots on failure)
+  if (!global.__drivers) {
+    global.__drivers = new Set();
+  }
+  global.__drivers.add(driver);
+  
   return driver;
 }
 

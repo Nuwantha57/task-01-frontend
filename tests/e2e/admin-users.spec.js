@@ -38,4 +38,20 @@ describe('Admin Users', function() {
       expect(await search.getAttribute('placeholder')).to.match(/Search/);
     }
   });
+
+  it('allows typing in search input and preserves value', async () => {
+    // Only run if table is present
+    const tables = await driver.findElements(By.css('table'));
+    if (!tables || tables.length === 0) {
+      return this.skip();
+    }
+
+    const search = await driver.findElement(By.css('input.search-input'));
+    await search.clear();
+    await search.sendKeys('john');
+
+    // Debounce/filtering may occur; just verify the value remains
+    const val = await search.getAttribute('value');
+    expect(val).to.equal('john');
+  });
 });
