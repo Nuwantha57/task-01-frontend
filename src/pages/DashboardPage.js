@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../api/api";
 
@@ -6,6 +6,21 @@ const DashboardPage = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // fetchUserData must be declared before useEffect hooks that reference it
+  const fetchUserData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await api.get("/me");
+      console.log('Fetched user data:', response.data);
+      setUser(response.data);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      navigate("/login");
+    } finally {
+      setLoading(false);
+    }
+  }, [navigate]);
 
   useEffect(() => {
     // Extract id_token from URL hash
@@ -19,7 +34,7 @@ const DashboardPage = () => {
 
     // Fetch user info from backend
     fetchUserData();
-  }, [navigate]);
+  }, [fetchUserData]);
 
   // Add visibility change listener to refetch when tab becomes visible
   useEffect(() => {
@@ -48,21 +63,8 @@ const DashboardPage = () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleVisibilityChange);
     };
-  }, []);
+  }, [fetchUserData]);
 
-  const fetchUserData = async () => {
-    try {
-      setLoading(true);
-      const response = await api.get("/me");
-      console.log('Fetched user data:', response.data);
-      setUser(response.data);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      navigate("/login");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const logout = () => {
     localStorage.removeItem("id_token");
@@ -199,22 +201,38 @@ const DashboardPage = () => {
         }
 
         .nav-link.active {
-          background: #3498db;
+          /* Increased contrast for accessibility: darker blue provides >=4.5:1 contrast with white text */
+          background: #1b4f72;
+        }
+
+        /* Improve keyboard focus visibility for links */
+        .nav-link:focus,
+        .nav-link:focus-visible {
+          outline: 2px solid rgba(255,255,255,0.9);
+          outline-offset: 2px;
         }
 
         .btn-logout {
-          background: #e74c3c;
+          /* Darker red to ensure sufficient contrast with white text (>=4.5:1) */
+          background: #c0392b;
           color: white;
           border: none;
           padding: 10px 20px;
           border-radius: 4px;
           cursor: pointer;
           font-weight: bold;
-          transition: background 0.3s;
+          transition: background 0.15s, transform 0.15s;
         }
 
         .btn-logout:hover {
-          background: #c0392b;
+          background: #992d22;
+          transform: translateY(-1px);
+        }
+
+        .btn-logout:focus,
+        .btn-logout:focus-visible {
+          outline: 2px solid rgba(255,255,255,0.9);
+          outline-offset: 2px;
         }
 
         .dashboard-content {
