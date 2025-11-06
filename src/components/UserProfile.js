@@ -104,14 +104,18 @@ const UserProfile = () => {
 
       <div className="profile-form">
         <div className="form-group">
-          <label>Email:</label>
+          <label htmlFor="email">Email:</label>
           <input
+            id="email"
+            name="email"
             type="email"
             value={user.email || ""}
             disabled
+            aria-label="Email address"
+            aria-describedby="emailHelp"
             className="disabled-input"
           />
-          <small>Email cannot be changed</small>
+          <small id="emailHelp">Email cannot be changed</small>
         </div>
 
         <div className="form-group">
@@ -259,13 +263,21 @@ const UserProfile = () => {
           transition: all 0.3s;
         }
 
+
+        /* Darker primary to ensure white text meets WCAG 4.5:1 contrast */
         .btn-primary {
-          background: #4CAF50;
+          background: #2e7d32;
           color: white;
         }
 
         .btn-primary:hover:not(:disabled) {
-          background: #45a049;
+          background: #276b2b;
+        }
+
+        .btn-primary:focus,
+        .btn-primary:focus-visible {
+          outline: 2px solid rgba(255,255,255,0.9);
+          outline-offset: 2px;
         }
 
         .btn-primary:disabled {

@@ -320,7 +320,8 @@ const AdminUsers = () => {
 
         .btn-select {
           padding: 6px 12px;
-          background: #2196F3;
+          /* Darker blue to ensure white text meets WCAG 4.5:1 contrast */
+          background: #1565C0;
           color: white;
           border: none;
           border-radius: 4px;
@@ -329,7 +330,13 @@ const AdminUsers = () => {
         }
 
         .btn-select:hover {
-          background: #1976D2;
+          background: #0d47a1;
+        }
+
+        .btn-select:focus,
+        .btn-select:focus-visible {
+          outline: 2px solid rgba(255,255,255,0.9);
+          outline-offset: 2px;
         }
 
         .no-data {

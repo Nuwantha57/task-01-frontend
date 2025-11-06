@@ -267,6 +267,7 @@ const AuditLogs = () => {
           display: flex;
           flex-direction: column;
           font-weight: bold;
+          color: #222; /* ensure label contrast against light background */
         }
 
         .filter-group input {
@@ -284,28 +285,35 @@ const AuditLogs = () => {
           font-weight: bold;
         }
 
+        /* Accessible button colors: darker shades to meet >=4.5:1 contrast with white */
         .btn-apply {
-          background: #4CAF50;
+          background: #2e7d32; /* darker green */
           color: white;
         }
 
         .btn-apply:hover {
-          background: #45a049;
+          background: #276b2b;
         }
 
         .btn-reset {
-          background: #f44336;
+          background: #b71c1c; /* darker red */
           color: white;
         }
 
         .btn-reset:hover {
-          background: #da190b;
+          background: #931414;
+        }
+
+        .btn-apply:focus, .btn-reset:focus,
+        .btn-apply:focus-visible, .btn-reset:focus-visible {
+          outline: 2px solid rgba(0,0,0,0.8);
+          outline-offset: 2px;
         }
 
         .stats {
           margin-bottom: 15px;
           font-weight: bold;
-          color: #333;
+          color: #222;
         }
 
         .table-container {
@@ -327,7 +335,8 @@ const AuditLogs = () => {
         }
 
         th {
-          background: #2196F3;
+          /* Darker blue header to ensure white text meets contrast requirements */
+          background: #1565C0;
           color: white;
           font-weight: bold;
           position: sticky;
