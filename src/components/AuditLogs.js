@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../api/api";
+import Navbar from "./Navbar";
+import "../styles/AuditLogs.css";
 
 const AuditLogs = () => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
   const [logs, setLogs] = useState([]);
   const [filteredLogs, setFilteredLogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,8 +24,19 @@ const AuditLogs = () => {
   });
 
   useEffect(() => {
+    fetchCurrentUser();
     fetchAuditLogs();
   }, [pagination.page]);
+
+  const fetchCurrentUser = async () => {
+    try {
+      const response = await api.get("/me");
+      setUser(response.data);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      navigate("/login");
+    }
+  };
 
   const fetchAuditLogs = async () => {
     try {
@@ -114,293 +130,144 @@ const AuditLogs = () => {
   if (loading) return <div className="loading">Loading audit logs...</div>;
 
   return (
-    <div className="audit-logs-container">
-      <h2>Audit Logs</h2>
+    <div className="audit-logs-page">
+      {user && <Navbar user={user} />}
+      
+      <div className="audit-logs-container">
+        <h2>Audit Logs</h2>
 
-      <div className="filters-section">
-        <h3>Filters</h3>
-        <div className="filter-group">
-          <label>
-            User ID:
-            <input
-              type="text"
-              name="userId"
-              value={filters.userId}
-              onChange={handleFilterChange}
-              placeholder="Enter user ID"
-            />
-          </label>
+        <div className="filters-section">
+          <h3>Filters</h3>
+          <div className="filters-grid">
+            <div className="filter-group">
+              <label htmlFor="userId">User ID</label>
+              <input
+                id="userId"
+                type="text"
+                name="userId"
+                value={filters.userId}
+                onChange={handleFilterChange}
+                placeholder="Enter user ID"
+              />
+            </div>
 
-          <label>
-            Event Type (client-side filter):
-            <input
-              type="text"
-              name="eventType"
-              value={filters.eventType}
-              onChange={handleFilterChange}
-              placeholder="e.g., LOGIN"
-            />
-          </label>
+            <div className="filter-group">
+              <label htmlFor="eventType">Event Type</label>
+              <input
+                id="eventType"
+                type="text"
+                name="eventType"
+                value={filters.eventType}
+                onChange={handleFilterChange}
+                placeholder="e.g., LOGIN"
+              />
+              <small>Client-side filter</small>
+            </div>
 
-          <label>
-            Date Range:
-            <input
-              type="text"
-              name="range"
-              value={filters.range}
-              onChange={handleFilterChange}
-              placeholder="YYYY-MM-DD_to_YYYY-MM-DD"
-            />
-            <small style={{ fontSize: '0.8em', color: '#666', marginTop: '3px' }}>
-              Format: 2024-01-01_to_2024-01-31
-            </small>
-          </label>
+            <div className="filter-group">
+              <label htmlFor="range">Date Range</label>
+              <input
+                id="range"
+                type="text"
+                name="range"
+                value={filters.range}
+                onChange={handleFilterChange}
+                placeholder="YYYY-MM-DD_to_YYYY-MM-DD"
+              />
+              <small>Format: 2024-01-01_to_2024-01-31</small>
+            </div>
+          </div>
 
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
-            <button onClick={handleApplyFilters} className="btn-apply">
+          <div className="filter-actions">
+            <button onClick={handleApplyFilters} className="btn-apply-filter">
               Apply Filters
             </button>
-            <button onClick={handleReset} className="btn-reset">
+            <button onClick={handleReset} className="btn-reset-filter">
               Reset
             </button>
           </div>
         </div>
-      </div>
 
-      {error && <div className="error-message">{error}</div>}
+        {error && <div className="error-message">{error}</div>}
 
-      <div className="stats">
-        <p>Total Records: {pagination.totalElements} | Page {pagination.page + 1} of {pagination.totalPages}</p>
-      </div>
+        <div className="logs-section">
+          <div className="logs-header">
+            <h3>Audit Log Records</h3>
+            <span className="logs-count">
+              Total: {pagination.totalElements} | Page {pagination.page + 1} of {pagination.totalPages}
+            </span>
+          </div>
 
-      <div className="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>User ID</th>
-              <th>Email</th>
-              <th>Event Status</th>
-              <th>Login Time</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredLogs.length > 0 ? (
-              filteredLogs.map(log => (
-                <tr key={log.id}>
-                  <td>{log.id}</td>
-                  <td>{log.userId}</td>
-                  <td>{log.userEmail || "N/A"}</td>
-                  <td>{log.loginStatus}</td>
-                  <td>{new Date(log.loginTime).toLocaleString()}</td>
+          <div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>User ID</th>
+                  <th>Email</th>
+                  <th>Event Status</th>
+                  <th>Login Time</th>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5" className="no-data">
-                  No audit logs found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody>
+                {filteredLogs.length > 0 ? (
+                  filteredLogs.map(log => (
+                    <tr key={log.id}>
+                      <td>{log.id}</td>
+                      <td>{log.userId}</td>
+                      <td>{log.userEmail || "N/A"}</td>
+                      <td>
+                        <span className={`status-badge ${log.loginStatus === 'SUCCESS' ? 'status-success' : 'status-failed'}`}>
+                          {log.loginStatus}
+                        </span>
+                      </td>
+                      <td>{new Date(log.loginTime).toLocaleString()}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="no-data">
+                      No audit logs found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
 
-      {pagination.totalPages > 1 && (
-        <div className="pagination">
-          <button 
-            onClick={() => handlePageChange(0)} 
-            disabled={pagination.page === 0}
-            className="pagination-btn"
-          >
-            First
-          </button>
-          <button 
-            onClick={() => handlePageChange(pagination.page - 1)} 
-            disabled={pagination.page === 0}
-            className="pagination-btn"
-          >
-            Previous
-          </button>
-          <span className="page-info">
-            Page {pagination.page + 1} of {pagination.totalPages}
-          </span>
-          <button 
-            onClick={() => handlePageChange(pagination.page + 1)} 
-            disabled={pagination.page >= pagination.totalPages - 1}
-            className="pagination-btn"
-          >
-            Next
-          </button>
-          <button 
-            onClick={() => handlePageChange(pagination.totalPages - 1)} 
-            disabled={pagination.page >= pagination.totalPages - 1}
-            className="pagination-btn"
-          >
-            Last
-          </button>
+          {pagination.totalPages > 1 && (
+            <div className="pagination">
+              <button 
+                onClick={() => handlePageChange(0)} 
+                disabled={pagination.page === 0}
+              >
+                First
+              </button>
+              <button 
+                onClick={() => handlePageChange(pagination.page - 1)} 
+                disabled={pagination.page === 0}
+              >
+                Previous
+              </button>
+              <span className="pagination-info">
+                Page {pagination.page + 1} of {pagination.totalPages}
+              </span>
+              <button 
+                onClick={() => handlePageChange(pagination.page + 1)} 
+                disabled={pagination.page >= pagination.totalPages - 1}
+              >
+                Next
+              </button>
+              <button 
+                onClick={() => handlePageChange(pagination.totalPages - 1)} 
+                disabled={pagination.page >= pagination.totalPages - 1}
+              >
+                Last
+              </button>
+            </div>
+          )}
         </div>
-      )}
-
-      <style>{`
-        .audit-logs-container {
-          padding: 20px;
-          max-width: 1400px;
-          margin: 0 auto;
-        }
-
-        .filters-section {
-          background: #f5f5f5;
-          padding: 15px;
-          border-radius: 5px;
-          margin-bottom: 20px;
-        }
-
-        .filter-group {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-          gap: 15px;
-          margin-top: 10px;
-        }
-
-        .filter-group label {
-          display: flex;
-          flex-direction: column;
-          font-weight: bold;
-          color: #222; /* ensure label contrast against light background */
-        }
-
-        .filter-group input {
-          padding: 8px;
-          margin-top: 5px;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-        }
-
-        .btn-apply, .btn-reset {
-          padding: 8px 15px;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          font-weight: bold;
-        }
-
-        /* Accessible button colors: darker shades to meet >=4.5:1 contrast with white */
-        .btn-apply {
-          background: #2e7d32; /* darker green */
-          color: white;
-        }
-
-        .btn-apply:hover {
-          background: #276b2b;
-        }
-
-        .btn-reset {
-          background: #b71c1c; /* darker red */
-          color: white;
-        }
-
-        .btn-reset:hover {
-          background: #931414;
-        }
-
-        .btn-apply:focus, .btn-reset:focus,
-        .btn-apply:focus-visible, .btn-reset:focus-visible {
-          outline: 2px solid rgba(0,0,0,0.8);
-          outline-offset: 2px;
-        }
-
-        .stats {
-          margin-bottom: 15px;
-          font-weight: bold;
-          color: #222;
-        }
-
-        .table-container {
-          overflow-x: auto;
-          margin-bottom: 20px;
-        }
-
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          background: white;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        th, td {
-          padding: 12px;
-          text-align: left;
-          border-bottom: 1px solid #ddd;
-        }
-
-        th {
-          /* Darker blue header to ensure white text meets contrast requirements */
-          background: #1565C0;
-          color: white;
-          font-weight: bold;
-          position: sticky;
-          top: 0;
-        }
-
-        tbody tr:hover {
-          background: #f5f5f5;
-        }
-
-        .pagination {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: 10px;
-          margin-top: 20px;
-        }
-
-        .pagination-btn {
-          padding: 8px 16px;
-          border: 1px solid #ddd;
-          background: white;
-          border-radius: 4px;
-          cursor: pointer;
-          font-weight: 500;
-        }
-
-        .pagination-btn:hover:not(:disabled) {
-          background: #2196F3;
-          color: white;
-        }
-
-        .pagination-btn:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .page-info {
-          padding: 0 15px;
-          font-weight: bold;
-        }
-
-        .error-message {
-          color: #d32f2f;
-          padding: 10px;
-          background: #ffebee;
-          border-radius: 4px;
-          margin-bottom: 15px;
-        }
-
-        .loading {
-          text-align: center;
-          padding: 40px;
-          font-size: 18px;
-          font-weight: bold;
-          color: #2196F3;
-        }
-
-        .no-data {
-          text-align: center;
-          color: #999;
-          padding: 30px;
-        }
-      `}</style>
+      </div>
     </div>
   );
 };

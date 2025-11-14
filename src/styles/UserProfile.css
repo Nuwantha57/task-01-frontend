@@ -1,0 +1,248 @@
+/* User Profile Page Styles */
+.profile-page {
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.profile-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.header-section h2 {
+  color: #2c3e50;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  color: #1e3a8a;
+}
+
+.btn-back {
+  background: white;
+  color: #2563eb;
+  border: 2px solid #2563eb;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+.btn-back:hover {
+  background: #2563eb;
+  color: white;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);
+}
+
+.message {
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-success {
+  background: #d4edda;
+  color: #155724;
+  border-left: 4px solid #28a745;
+}
+
+.message-error {
+  background: #fff5f5;
+  color: #c53030;
+  border-left: 4px solid #c53030;
+}
+
+.profile-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.profile-avatar {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.avatar-icon {
+  font-size: 5rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.avatar-label {
+  color: #6c757d;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  color: #495057;
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.label-icon {
+  font-size: 1.1rem;
+}
+
+.form-group input,
+.form-group select {
+  padding: 0.875rem 1.25rem;
+  font-size: 1rem;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-group input:disabled {
+  background: #f8f9fa;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+.readonly-field {
+  background: #f8f9fa;
+  padding: 0.875rem 1.25rem;
+  border-radius: 8px;
+  color: #495057;
+  border: 2px solid #e9ecef;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.btn-save {
+  flex: 1;
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-save:hover:not(:disabled) {
+  background: #1d4ed8;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);
+}
+
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-cancel-form {
+  flex: 1;
+  background: white;
+  color: #6c757d;
+  border: 2px solid #dee2e6;
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-cancel-form:hover {
+  background: #f8f9fa;
+  border-color: #adb5bd;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  font-size: 1.2rem;
+  color: #6c757d;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 1rem;
+  }
+
+  .header-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .header-section h2 {
+    font-size: 1.5rem;
+  }
+
+  .profile-card {
+    padding: 1.5rem;
+  }
+
+  .avatar-icon {
+    font-size: 4rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+}

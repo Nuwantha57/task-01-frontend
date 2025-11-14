@@ -1,4 +1,5 @@
 import React from "react";
+import "../styles/Login.css";
 
 const LoginPage = () => {
   const handleLogin = () => {
@@ -13,9 +14,41 @@ const LoginPage = () => {
   };
 
   return (
-    <div style={{ textAlign: "center", marginTop: "150px" }}>
-      <h2>Admin Login</h2>
-      <button id="loginBtn" onClick={handleLogin} style={{ padding: '10px 20px', fontSize: '16px' }}>Login with AWS Cognito</button>
+    <div className="login-page">
+      <div className="login-container">
+        <div className="login-logo">⚡</div>
+        <h1 className="login-title">Admin Portal</h1>
+        <p className="login-subtitle">
+          Secure access to your administration dashboard
+        </p>
+
+        <button id="loginBtn" onClick={handleLogin} className="login-btn">
+          <span className="login-icon">🔐</span>
+          <span>Login with AWS Cognito</span>
+        </button>
+
+        <div className="login-features">
+          <h3>Secure & Powerful</h3>
+          <div className="feature-list">
+            <div className="feature-item">
+              <span className="feature-icon">✓</span>
+              <span>Secure authentication with AWS Cognito</span>
+            </div>
+            <div className="feature-item">
+              <span className="feature-icon">✓</span>
+              <span>Role-based access control</span>
+            </div>
+            <div className="feature-item">
+              <span className="feature-icon">✓</span>
+              <span>Comprehensive audit logging</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="login-footer">
+          © 2025 Admin Portal. All rights reserved.
+        </div>
+      </div>
     </div>
   );
 };
